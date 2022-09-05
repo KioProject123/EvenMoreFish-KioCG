@@ -67,6 +67,17 @@ public class FishingProcessor implements Listener {
         }
 
         if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH) {
+            final Item nonCustom = (Item) event.getCaught();
+
+            // 防止覆盖原版宝藏
+            final Material fishType = nonCustom.getItemStack().getType();
+            if (fishType != Material.SALMON &&
+                fishType != Material.COD &&
+                fishType != Material.TROPICAL_FISH &&
+                fishType != Material.PUFFERFISH) {
+                return;
+            }
+
             ItemStack fish = getFish(event.getPlayer(), event.getHook().getLocation(), event.getPlayer().getInventory().getItemInMainHand(), true, true);
 
             if (fish == null) {
@@ -74,7 +85,7 @@ public class FishingProcessor implements Listener {
             }
 
             // replaces the fishing item with a custom evenmorefish fish.
-            Item nonCustom = (Item) event.getCaught();
+            // Item nonCustom = (Item) event.getCaught();
             if (nonCustom != null) {
                 if (fish.getType().isAir()) {
                     nonCustom.remove();
