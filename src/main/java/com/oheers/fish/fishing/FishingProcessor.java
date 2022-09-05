@@ -78,6 +78,9 @@ public class FishingProcessor implements Listener {
                 return;
             }
 
+            // 防止自动钓鱼机
+            if (!event.getHook().isInOpenWater()) return;
+
             ItemStack fish = getFish(event.getPlayer(), event.getHook().getLocation(), event.getPlayer().getInventory().getItemInMainHand(), true, true);
 
             if (fish == null) {
