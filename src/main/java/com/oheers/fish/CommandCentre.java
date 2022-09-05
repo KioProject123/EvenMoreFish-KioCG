@@ -324,7 +324,7 @@ class Controls {
                             if (r.getDisplayName() != null)
                                 builder.append(FishUtils.translateHexColorCodes(r.getDisplayName()), ComponentBuilder.FormatRetention.NONE);
                             else
-                                builder.append(FishUtils.translateHexColorCodes(r.getColour() + "&l" + r.getValue() + ": "), ComponentBuilder.FormatRetention.NONE);
+                                builder.append(FishUtils.translateHexColorCodes(r.getColour() + r.getValue() + ": "), ComponentBuilder.FormatRetention.NONE);
 
                             for (Fish fish : EvenMoreFish.fishCollection.get(r)) {
                                 if (fish.getDisplayName() != null)
