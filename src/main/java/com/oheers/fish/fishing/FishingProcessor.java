@@ -38,7 +38,7 @@ import java.util.logging.Level;
 
 public class FishingProcessor implements Listener {
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public static void process(PlayerFishEvent event) {
         if (!isCustomFishAllowed(event.getPlayer().getUniqueId())) {
             return;
