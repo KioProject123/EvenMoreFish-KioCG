@@ -155,7 +155,7 @@ public class EvenMoreFish extends JavaPlugin {
 
         // async check for updates on the spigot page
         Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            isUpdateAvailable = checkUpdate();
+            // isUpdateAvailable = checkUpdate();
             try {
                 checkConfigVers();
             } catch (IOException exception) {
@@ -170,7 +170,7 @@ public class EvenMoreFish extends JavaPlugin {
         listeners();
         commands();
 
-        if (!mainConfig.debugSession()) metrics();
+        // if (!mainConfig.debugSession()) metrics();
 
         AutoRunner.init();
 
@@ -238,7 +238,7 @@ public class EvenMoreFish extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new JoinChecker(), this);
         getServer().getPluginManager().registerEvents(new FishingProcessor(), this);
         getServer().getPluginManager().registerEvents(new InteractHandler(this), this);
-        getServer().getPluginManager().registerEvents(new UpdateNotify(), this);
+        // getServer().getPluginManager().registerEvents(new UpdateNotify(), this);
         getServer().getPluginManager().registerEvents(new SkullSaver(), this);
         getServer().getPluginManager().registerEvents(new BaitApplicationListener(), this);
 
@@ -268,27 +268,27 @@ public class EvenMoreFish extends JavaPlugin {
         }
     }
 
-    private void metrics() {
-        Metrics metrics = new Metrics(this, METRIC_ID);
-
-        metrics.addCustomChart(new SingleLineChart("fish_caught", () -> {
-            int returning = metric_fishCaught;
-            metric_fishCaught = 0;
-            return returning;
-        }));
-
-        metrics.addCustomChart(new SingleLineChart("baits_applied", () -> {
-            int returning = metric_baitsApplied;
-            metric_baitsApplied = 0;
-            return returning;
-        }));
-
-        metrics.addCustomChart(new SingleLineChart("baits_used", () -> {
-            int returning = metric_baitsUsed;
-            metric_baitsUsed = 0;
-            return returning;
-        }));
-    }
+//    private void metrics() {
+//        Metrics metrics = new Metrics(this, METRIC_ID);
+//
+//        metrics.addCustomChart(new SingleLineChart("fish_caught", () -> {
+//            int returning = metric_fishCaught;
+//            metric_fishCaught = 0;
+//            return returning;
+//        }));
+//
+//        metrics.addCustomChart(new SingleLineChart("baits_applied", () -> {
+//            int returning = metric_baitsApplied;
+//            metric_baitsApplied = 0;
+//            return returning;
+//        }));
+//
+//        metrics.addCustomChart(new SingleLineChart("baits_used", () -> {
+//            int returning = metric_baitsUsed;
+//            metric_baitsUsed = 0;
+//            return returning;
+//        }));
+//    }
 
     private void commands() {
         getCommand("evenmorefish").setExecutor(new CommandCentre(this));
@@ -388,23 +388,23 @@ public class EvenMoreFish extends JavaPlugin {
     }
 
     // Checks for updates, surprisingly
-    private boolean checkUpdate() {
-
-
-        String[] spigotVersion = new UpdateChecker(this, 91310).getVersion().split("\\.");
-        String[] serverVersion = getDescription().getVersion().split("\\.");
-
-        for (int i = 0; i < serverVersion.length; i++) {
-            if (i < spigotVersion.length) {
-                if (Integer.parseInt(spigotVersion[i]) > Integer.parseInt(serverVersion[i])) {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        }
-        return false;
-    }
+//    private boolean checkUpdate() {
+//
+//
+//        String[] spigotVersion = new UpdateChecker(this, 91310).getVersion().split("\\.");
+//        String[] serverVersion = getDescription().getVersion().split("\\.");
+//
+//        for (int i = 0; i < serverVersion.length; i++) {
+//            if (i < spigotVersion.length) {
+//                if (Integer.parseInt(spigotVersion[i]) > Integer.parseInt(serverVersion[i])) {
+//                    return true;
+//                }
+//            } else {
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
 
     private void checkConfigVers() throws IOException {
 
