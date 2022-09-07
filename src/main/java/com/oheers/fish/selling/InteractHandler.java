@@ -1,6 +1,7 @@
 package com.oheers.fish.selling;
 
 import com.oheers.fish.EvenMoreFish;
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
@@ -41,13 +42,16 @@ public class InteractHandler implements Listener {
         } else {
             // determines what the player has clicked, or if they've just added an item
             // to the menu
-            if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
+            if (clickedItem.isSimilar(gui.getMenuIcon())) {
+                Bukkit.dispatchCommand(event.getWhoClicked(), "menu");
+                event.setCancelled(true);
+            } else if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
                 // cancels on right click
-                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-                    event.setCancelled(true);
-                    gui.close();
-                    return;
-                }
+//                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
+//                    event.setCancelled(true);
+//                    gui.close();
+//                    return;
+//                }
 
                 // makes the player confirm their choice
                 gui.createIcon(false);
@@ -65,14 +69,26 @@ public class InteractHandler implements Listener {
 
             } else if (clickedItem.isSimilar(gui.getConfirmSellAllIcon())) {
                 gui.sell(true);
-                gui.close();
+                // gui.close(); KioCG - 不要关闭面板
+                event.setCancelled(true); // KioCG - 这是缺少的吗?
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        gui.updateSellItem();
+                        gui.updateSellAllItem();
+                        gui.setModified(true);
+                        gui.resetGlassColour();
+
+                        gui.error = false;
+                    }
+                }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
             } else if (clickedItem.isSimilar(gui.getConfirmIcon())) {
                 // cancels on right click
-                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-                    event.setCancelled(true);
-                    gui.close();
-                    return;
-                }
+//                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
+//                    event.setCancelled(true);
+//                    gui.close();
+//                    return;
+//                }
 
                 event.setCancelled(true);
                 if (gui.getModified()) {
@@ -84,7 +100,18 @@ public class InteractHandler implements Listener {
                     gui.setModified(false);
                 } else {
                     gui.sell(false);
-                    gui.close();
+                    // gui.close(); KioCG - 不要关闭面板
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            gui.updateSellItem();
+                            gui.updateSellAllItem();
+                            gui.setModified(true);
+                            gui.resetGlassColour();
+
+                            gui.error = false;
+                        }
+                    }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
                 }
             } else if (clickedItem.isSimilar(gui.getFiller()) || clickedItem.isSimilar(gui.getErrorFiller())) {
                 event.setCancelled(true);
