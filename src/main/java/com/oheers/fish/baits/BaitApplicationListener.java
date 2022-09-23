@@ -34,10 +34,10 @@ public class BaitApplicationListener implements Listener {
         }
 
 
-        if (!event.getWhoClicked().getGameMode().equals(GameMode.SURVIVAL)) {
-            new Message(ConfigMessage.BAIT_WRONG_GAMEMODE).broadcast(event.getWhoClicked(), true, false);
-            return;
-        }
+//        if (!event.getWhoClicked().getGameMode().equals(GameMode.SURVIVAL)) {
+//            new Message(ConfigMessage.BAIT_WRONG_GAMEMODE).broadcast(event.getWhoClicked(), true, false);
+//            return;
+//        }
 
         ApplicationResult result = null;
         Bait bait = EvenMoreFish.baits.get(BaitNBTManager.getBaitName(event.getCursor()));
@@ -49,13 +49,13 @@ public class BaitApplicationListener implements Listener {
         }
 
         try {
-            if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-                result = BaitNBTManager.applyBaitedRodNBT(fishingRod, bait, event.getCursor().getAmount());
-                EvenMoreFish.metric_baitsApplied += event.getCursor().getAmount();
-            } else {
+//            if (event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+//                result = BaitNBTManager.applyBaitedRodNBT(fishingRod, bait, event.getCursor().getAmount());
+//                EvenMoreFish.metric_baitsApplied += event.getCursor().getAmount();
+//            } else {
                 result = BaitNBTManager.applyBaitedRodNBT(fishingRod, bait, 1);
                 EvenMoreFish.metric_baitsApplied++;
-            }
+//            }
 
         } catch (MaxBaitsReachedException exception) {
             new Message(ConfigMessage.BAITS_MAXED).broadcast(event.getWhoClicked(), true, false);
