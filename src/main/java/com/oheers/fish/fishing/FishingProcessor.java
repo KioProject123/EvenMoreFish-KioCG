@@ -67,6 +67,9 @@ public class FishingProcessor implements Listener {
         }
 
         if (event.getState() == PlayerFishEvent.State.CAUGHT_FISH) {
+            // 防止自动钓鱼机
+            if (!event.getHook().isInOpenWater()) return;
+
             final Item nonCustom = (Item) event.getCaught();
 
             // 防止覆盖原版宝藏
@@ -77,9 +80,6 @@ public class FishingProcessor implements Listener {
                 fishType != Material.PUFFERFISH) {
                 return;
             }
-
-            // 防止自动钓鱼机
-            if (!event.getHook().isInOpenWater()) return;
 
             ItemStack fish = getFish(event.getPlayer(), event.getHook().getLocation(), event.getPlayer().getInventory().getItemInMainHand(), true, true);
 

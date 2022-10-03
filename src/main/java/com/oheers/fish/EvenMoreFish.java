@@ -268,11 +268,11 @@ public class EvenMoreFish extends JavaPlugin {
             }
         }
 
-//        if (Bukkit.getPluginManager().getPlugin("AureliumSkills") != null) {
-//            if (mainConfig.disableAureliumSkills()) {
-//                getServer().getPluginManager().registerEvents(AureliumSkillsFishingEvent.getInstance(), this);
-//            }
-//        }
+        if (Bukkit.getPluginManager().getPlugin("AureliumSkills") != null) {
+            if (mainConfig.disableAureliumSkills()) {
+                getServer().getPluginManager().registerEvents(AureliumSkillsFishingEvent.getInstance(), this);
+            }
+        }
     }
 
 //    private void metrics() {
