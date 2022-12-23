@@ -2,6 +2,9 @@ package com.oheers.fish.xmas2022;
 
 import com.oheers.fish.EvenMoreFish;
 import com.oheers.fish.config.messages.Message;
+import com.oheers.fish.database.DataManager;
+import com.oheers.fish.database.FishReport;
+import com.oheers.fish.fishing.items.Fish;
 import com.oheers.fish.selling.WorthNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,6 +16,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -30,9 +39,9 @@ public class XmasGUI implements InventoryHolder {
      */
     public XmasGUI(@NotNull final UUID viewer) {
         this.inventory = Bukkit.createInventory(this, INV_SIZE, new Message(EvenMoreFish.xmas2022Config.getGUIName()).getRawMessage(true, false));
+        this.viewer = viewer;
         loadFiller();
         setFish();
-        this.viewer = viewer;
     }
 
     /**
@@ -68,19 +77,31 @@ public class XmasGUI implements InventoryHolder {
      */
     public void setFish() {
         int day = 0;
-        for (int i = 0; i < 54; i++) {
-            if (this.inventory.getItem(i) != null) {
-                continue;
-            }
+        List<FishReport> fishReportList = DataManager.getInstance().getFishReportsIfExists(viewer);
+        dayLoop:
+            for (int i = 0; i < 54; i++) {
+                if (this.inventory.getItem(i) != null) {
+                    continue;
+                }
 
-            day++;
+                day++;
 
-            try {
-                this.inventory.setItem(i, EvenMoreFish.xmasFish.get(day).give(-1));
-            } catch (NullPointerException exception) {
-                EvenMoreFish.logger.log(Level.SEVERE, "No fish found for day (" + day + ") in xmas2022.yml config file.");
+                try {
+                    if (fishReportList == null) this.inventory.setItem(i, new ItemStack(EvenMoreFish.xmas2022Config.getLockedFishMaterial()));
+
+                    Fish currentDay = EvenMoreFish.xmasFish.get(day);
+                    for (FishReport fishReport : fishReportList) {
+                        if (fishReport.getName().equals(currentDay.getName()) && fishReport.getRarity().equals("Christmas 2022")) {
+                            this.inventory.setItem(i, createItem(true, day, currentDay, fishReport));
+                            continue dayLoop;
+                        }
+                    }
+                    this.inventory.setItem(i, createItem(false, day, currentDay, null));
+
+                } catch (NullPointerException exception) {
+                    EvenMoreFish.logger.log(Level.SEVERE, "No fish found for day (" + day + ") in xmas2022.yml config file.");
+                }
             }
-        }
     }
 
     public void loadFiller() {
@@ -91,5 +112,39 @@ public class XmasGUI implements InventoryHolder {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+
+    private ItemStack createItem(final boolean unlocked, final int day, @NotNull final Fish fish, final FishReport fishReport) {
+        if (unlocked) {
+            ItemStack itemStack = EvenMoreFish.xmasFish.get(day).give(-1);
+            ItemMeta meta = itemStack.getItemMeta();
+            Message fishName = new Message(EvenMoreFish.xmas2022Config.getFoundFishName());
+            fishName.setDay(Integer.toString(day));
+            fishName.setName(fish.getName());
+            meta.setDisplayName(fishName.getRawMessage(true, true));
+            Message fishLore = new Message(EvenMoreFish.xmas2022Config.getFoundFishLore());
+            fishLore.setName(fish.getName());
+            fishLore.setNumCaught(Integer.toString(fishReport.getNumCaught()));
+            fishLore.setLargestSize(Float.toString(fishReport.getLargestLength()));
+            LocalDateTime dateTime = LocalDateTime.ofEpochSecond(fishReport.getTimeEpoch(), 0, ZoneOffset.UTC);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM, yyyy", Locale.ENGLISH);
+            fishLore.setFirstCaught(dateTime.format(formatter));
+            meta.setLore(fishLore.getRawListMessage(true, true));
+            itemStack.setItemMeta(meta);
+            return itemStack;
+        } else {
+            ItemStack itemStack = new ItemStack(EvenMoreFish.xmas2022Config.getLockedFishMaterial());
+            ItemMeta meta = itemStack.getItemMeta();
+            Message lockedName = new Message(EvenMoreFish.xmas2022Config.getLockedFishName());
+            lockedName.setDay(Integer.toString(day));
+            meta.setDisplayName(lockedName.getRawMessage(true, true));
+            Message lockedLore = new Message(EvenMoreFish.xmas2022Config.getLockedFishLore());
+            int dayDifference = day - Calendar.getInstance().get(Calendar.DATE);
+            if (dayDifference > 0) lockedLore.setTimeRemaining(dayDifference + " days");
+            else lockedLore.setTimeRemaining("(never)");
+            meta.setLore(lockedLore.getRawListMessage(true, true));
+            itemStack.setItemMeta(meta);
+            return itemStack;
+        }
     }
 }
