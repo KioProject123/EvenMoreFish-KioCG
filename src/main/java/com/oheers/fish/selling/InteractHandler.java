@@ -78,17 +78,12 @@ public class InteractHandler implements Listener {
                 gui.sell(true);
                 // gui.close(); KioCG - 不要关闭面板
                 event.setCancelled(true); // KioCG - 这是缺少的吗?
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        gui.updateSellItem();
-                        gui.updateSellAllItem();
-                        gui.setModified(true);
-                        gui.resetGlassColour();
+                gui.updateSellItem();
+                gui.updateSellAllItem();
+                gui.setModified(true);
+                gui.resetGlassColour();
 
-                        gui.error = false;
-                    }
-                }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
+                gui.error = false;
             } else if (clickedItem.isSimilar(gui.getConfirmIcon())) {
                 // cancels on right click
 //                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
@@ -108,17 +103,12 @@ public class InteractHandler implements Listener {
                 } else {
                     gui.sell(false);
                     // gui.close(); KioCG - 不要关闭面板
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            gui.updateSellItem();
-                            gui.updateSellAllItem();
-                            gui.setModified(true);
-                            gui.resetGlassColour();
+                    gui.updateSellItem();
+                    gui.updateSellAllItem();
+                    gui.setModified(true);
+                    gui.resetGlassColour();
 
-                            gui.error = false;
-                        }
-                    }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(getClass()));
+                    gui.error = false;
                 }
             } else if (clickedItem.isSimilar(gui.getFiller()) || clickedItem.isSimilar(gui.getErrorFiller())) {
                 event.setCancelled(true);
