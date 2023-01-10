@@ -346,7 +346,7 @@ public class EvenMoreFish extends JavaPlugin {
                 exception.printStackTrace();
             }
         }
-        DataManager.getInstance().uncacheAll();
+        if (EvenMoreFish.mainConfig.databaseEnabled()) DataManager.getInstance().uncacheAll();
     }
 
     public void reload() {

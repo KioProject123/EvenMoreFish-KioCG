@@ -658,7 +658,7 @@ public class Competition {
             Iterator<CompetitionEntry> iterator = leaderboard.getIterator();
             int i = 1;
             CompetitionEntry topEntry = leaderboard.getTopEntry();
-            if (topEntry != null) {
+            if (EvenMoreFish.mainConfig.databaseEnabled() && topEntry != null) {
                 UserReport report = DataManager.getInstance().getUserReportIfExists(topEntry.getPlayer());
                 if (report != null) {
                     report.incrementCompetitionsWon(1);
