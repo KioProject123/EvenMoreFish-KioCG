@@ -141,10 +141,6 @@ public class FishingProcessor implements Listener {
         if (fishRarity == null) {
             EvenMoreFish.logger.log(Level.SEVERE, "Could not determine a rarity for fish for " + player.getName());
             return null;
-        } else if (fishRarity == EvenMoreFish.xmasRarity) {
-            Fish fish = EvenMoreFish.xmasFish.get(Calendar.getInstance().get(Calendar.DATE));
-            fish.setFisherman(player.getUniqueId());
-            return fish;
         }
 
         Fish fish = getFish(fishRarity, location, player, 1, null, true);
@@ -264,7 +260,7 @@ public class FishingProcessor implements Listener {
             e.printStackTrace();
         }
 
-        if (EvenMoreFish.mainConfig.isDatabaseOnline()) {
+        if (EvenMoreFish.mainConfig.isDatabaseOnline() && EvenMoreFish.mainConfig.doingExperimentalFeatures()) {
             Fish finalFish = fish;
             new BukkitRunnable() {
                 @Override
