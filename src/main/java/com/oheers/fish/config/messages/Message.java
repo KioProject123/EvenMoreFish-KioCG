@@ -232,7 +232,7 @@ public class Message {
         if (doVariables) variableFormat();
         if (doColour) colourFormat();
 
-        if (relevantPlayer != null) this.message = PlaceholderAPI.setPlaceholders(relevantPlayer, this.message);
+        if (relevantPlayer != null && EvenMoreFish.usingPAPI) this.message = PlaceholderAPI.setPlaceholders(relevantPlayer, this.message);
 
         if (this.canSilent && this.message.endsWith(" -s")) return "";
         else return this.message;
