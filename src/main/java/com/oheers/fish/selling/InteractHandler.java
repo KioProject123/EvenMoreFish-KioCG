@@ -5,6 +5,7 @@ import com.oheers.fish.xmas2022.XmasGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -53,6 +54,10 @@ public class InteractHandler implements Listener {
                 Bukkit.dispatchCommand(event.getWhoClicked(), "menu");
                 event.setCancelled(true);
             } else if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
+                if (event.getClick() != ClickType.LEFT) {
+                    event.setCancelled(true);
+                    return;
+                }
                 // cancels on right click
 //                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
 //                    event.setCancelled(true);
@@ -68,6 +73,11 @@ public class InteractHandler implements Listener {
                 event.setCancelled(true);
 
             } else if (clickedItem.isSimilar(gui.getSellAllIcon()) || clickedItem.isSimilar(gui.getSellAllErrorIcon())) {
+                if (event.getClick() != ClickType.LEFT) {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 gui.createIcon(true);
                 gui.setIcon(true);
 
@@ -75,6 +85,11 @@ public class InteractHandler implements Listener {
                 event.setCancelled(true);
 
             } else if (clickedItem.isSimilar(gui.getConfirmSellAllIcon())) {
+                if (event.getClick() != ClickType.LEFT) {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 gui.sell(true);
                 // gui.close(); KioCG - 不要关闭面板
                 event.setCancelled(true); // KioCG - 这是缺少的吗?
@@ -85,6 +100,11 @@ public class InteractHandler implements Listener {
 
                 gui.error = false;
             } else if (clickedItem.isSimilar(gui.getConfirmIcon())) {
+                if (event.getClick() != ClickType.LEFT) {
+                    event.setCancelled(true);
+                    return;
+                }
+
                 // cancels on right click
 //                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
 //                    event.setCancelled(true);
