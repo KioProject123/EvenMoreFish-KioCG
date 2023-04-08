@@ -196,7 +196,7 @@ public class FishingProcessor implements Listener {
                     fishingRod.setItemMeta(newMeta);
                     EvenMoreFish.metric_baitsUsed++;
                 } catch (MaxBaitsReachedException | MaxBaitReachedException exception) {
-                    exception.printStackTrace();
+                    BaitNBTManager.deleteAllBaits(fishingRod); // KioCG
                 }
             } else {
                 fish = chooseNonBaitFish(player, location);

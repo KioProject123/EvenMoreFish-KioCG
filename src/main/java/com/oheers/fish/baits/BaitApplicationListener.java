@@ -34,10 +34,10 @@ public class BaitApplicationListener implements Listener {
         }
 
 
-//        if (!event.getWhoClicked().getGameMode().equals(GameMode.SURVIVAL)) {
-//            new Message(ConfigMessage.BAIT_WRONG_GAMEMODE).broadcast(event.getWhoClicked(), true, false);
-//            return;
-//        }
+        if (!event.getWhoClicked().getGameMode().equals(GameMode.SURVIVAL)) {
+            new Message(ConfigMessage.BAIT_WRONG_GAMEMODE).broadcast(event.getWhoClicked(), true, false);
+            return;
+        }
 
         ApplicationResult result = null;
         Bait bait = EvenMoreFish.baits.get(BaitNBTManager.getBaitName(event.getCursor()));
