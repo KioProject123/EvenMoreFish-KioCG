@@ -135,11 +135,11 @@ public class Message {
      */
     public void broadcast(final boolean doColour, final boolean doVariables) {
         // 屏蔽空消息
-        if (this.message.isEmpty()) return;
+        if (this.message.isEmpty() || this.message.endsWith(" -s")) return;
 
         if (doVariables) variableFormat();
         if (doColour) colourFormat();
-        if (this.message.endsWith(" -s") && this.canSilent) return;
+        //if (this.message.endsWith(" -s") && this.canSilent) return;
 
         if (relevantPlayer != null) this.message = PlaceholderAPI.setPlaceholders(relevantPlayer, this.message);
 
@@ -157,11 +157,11 @@ public class Message {
      */
     public void broadcast(@NotNull final Player player, final boolean doColour, final boolean doVariables) {
         // 屏蔽空消息
-        if (this.message.isEmpty()) return;
+        if (this.message.isEmpty() || this.message.endsWith(" -s")) return;
 
         if (doVariables) variableFormat();
         if (doColour) colourFormat();
-        if (this.message.endsWith(" -s") && this.canSilent) return;
+        //if (this.message.endsWith(" -s") && this.canSilent) return;
 
         if (relevantPlayer != null) this.message = PlaceholderAPI.setPlaceholders(relevantPlayer, this.message);
 
@@ -178,11 +178,11 @@ public class Message {
      */
     public void broadcast(@NotNull final CommandSender sender, final boolean doColour, final boolean doVariables) {
         // 屏蔽空消息
-        if (this.message.isEmpty()) return;
+        if (this.message.isEmpty() || this.message.endsWith(" -s")) return;
 
         if (doVariables) variableFormat();
         if (doColour) colourFormat();
-        if (this.message.endsWith(" -s") && this.canSilent) return;
+        //if (this.message.endsWith(" -s") && this.canSilent) return;
 
         if (relevantPlayer != null) this.message = PlaceholderAPI.setPlaceholders(relevantPlayer, this.message);
 
