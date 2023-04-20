@@ -228,6 +228,7 @@ public class Fish implements Cloneable {
         generateSize();
         checkMessage();
         checkEffects();
+        wasBaited = false; // KioCG
     }
 
     /**
