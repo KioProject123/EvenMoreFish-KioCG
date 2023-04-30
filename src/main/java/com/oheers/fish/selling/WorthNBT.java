@@ -22,34 +22,34 @@ public class WorthNBT {
         NBTCompound emfCompound = nbtItem.getOrCreateCompound(NbtUtils.Keys.EMF_COMPOUND);
         if (fish.getLength() > 0)
             emfCompound.setFloat(NbtUtils.Keys.EMF_FISH_LENGTH, fish.getLength());
-        if (!fish.hasFishermanDisabled() && fish.getFisherman() != null)
-            emfCompound.setString(NbtUtils.Keys.EMF_FISH_PLAYER, fish.getFisherman().toString());
+//        if (!fish.hasFishermanDisabled() && fish.getFisherman() != null)
+//            emfCompound.setString(NbtUtils.Keys.EMF_FISH_PLAYER, fish.getFisherman().toString());
         emfCompound.setString(NbtUtils.Keys.EMF_FISH_NAME, fish.getName());
         emfCompound.setString(NbtUtils.Keys.EMF_FISH_RARITY, fish.getRarity().getValue());
-        emfCompound.setInteger(NbtUtils.Keys.EMF_FISH_RANDOM_INDEX, fish.getFactory().getChosenRandomIndex());
-        emfCompound.setBoolean(NbtUtils.Keys.EMF_XMAS_FISH, fish.isXmasFish());
+//        emfCompound.setInteger(NbtUtils.Keys.EMF_FISH_RANDOM_INDEX, fish.getFactory().getChosenRandomIndex());
+//        emfCompound.setBoolean(NbtUtils.Keys.EMF_XMAS_FISH, fish.isXmasFish());
 
         return nbtItem.getItem();
     }
 
     public static void setNBT(Skull fishSkull, Fish fish) { //todo issue 173
         NamespacedKey nbtlength = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_LENGTH);
-        NamespacedKey nbtplayer = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_PLAYER);
+//        NamespacedKey nbtplayer = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_PLAYER);
         NamespacedKey nbtrarity = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_RARITY);
         NamespacedKey nbtname = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_NAME);
-        NamespacedKey nbtrandomIndex = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
-        NamespacedKey nbtxmasfish = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_XMAS_FISH);
+//        NamespacedKey nbtrandomIndex = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_FISH_RANDOM_INDEX);
+//        NamespacedKey nbtxmasfish = NbtUtils.getNamespacedKey(NbtUtils.Keys.EMF_XMAS_FISH);
 
         PersistentDataContainer itemMeta = fishSkull.getPersistentDataContainer();
 
         if (fish.getLength() > 0)
             itemMeta.set(nbtlength, PersistentDataType.FLOAT, fish.getLength());
-        if (fish.getFisherman() != null && !fish.hasFishermanDisabled())
-            itemMeta.set(nbtplayer, PersistentDataType.STRING, fish.getFisherman().toString());
-        itemMeta.set(nbtrandomIndex, PersistentDataType.INTEGER, fish.getFactory().getChosenRandomIndex());
+//        if (fish.getFisherman() != null && !fish.hasFishermanDisabled())
+//            itemMeta.set(nbtplayer, PersistentDataType.STRING, fish.getFisherman().toString());
+//        itemMeta.set(nbtrandomIndex, PersistentDataType.INTEGER, fish.getFactory().getChosenRandomIndex());
         itemMeta.set(nbtrarity, PersistentDataType.STRING, fish.getRarity().getValue());
         itemMeta.set(nbtname, PersistentDataType.STRING, fish.getName());
-        itemMeta.set(nbtxmasfish, PersistentDataType.INTEGER, (fish.isXmasFish()) ? 1 : 0);
+//        itemMeta.set(nbtxmasfish, PersistentDataType.INTEGER, (fish.isXmasFish()) ? 1 : 0);
     }
 
     public static double getValue(ItemStack item) {
