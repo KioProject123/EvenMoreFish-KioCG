@@ -1,9 +1,16 @@
 package com.oheers.fish.selling;
 
+import com.devskiller.friendly_id.FriendlyId;
 import com.oheers.fish.EvenMoreFish;
 import com.oheers.fish.FishUtils;
+import com.oheers.fish.NbtUtils;
 import com.oheers.fish.config.messages.ConfigMessage;
 import com.oheers.fish.config.messages.Message;
+import com.oheers.fish.database.DataManager;
+import com.oheers.fish.utils.ItemFactory;
+import de.tr7zw.changeme.nbtapi.NBTItem;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import me.ryanhamshire.GriefPrevention.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,10 +22,12 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
 
 public class SellGUI implements InventoryHolder {
 
@@ -104,7 +113,7 @@ public class SellGUI implements InventoryHolder {
 
         // Generates the lore, looping through each line in messages.yml lore thingy, and generating it
         Message message = new Message(ConfigMessage.WORTH_GUI_SELL_ALL_BUTTON_LORE);
-        message.setSellPrice(getTotalWorth(true));
+        message.setSellPrice(String.valueOf(formatWorth(getTotalWorth(true))));
 
         saMeta.setLore(Arrays.asList(message.getRawMessage(true, true).split("\n")));
 
@@ -133,7 +142,7 @@ public class SellGUI implements InventoryHolder {
 
         // Generates the lore, looping through each line in messages.yml lore thingy, and generating it
         Message message = new Message(ConfigMessage.WORTH_GUI_SELL_LORE);
-        message.setSellPrice(getTotalWorth(false));
+        message.setSellPrice(String.valueOf(formatWorth(getTotalWorth(false))));
 
         sellMeta.setLore(new ArrayList<>(Arrays.asList(message.getRawMessage(true, true).split("\n"))));
 
@@ -190,8 +199,8 @@ public class SellGUI implements InventoryHolder {
     }
 
     public void createIcon(boolean sellAll) {
-        String totalWorth = getTotalWorth(sellAll);
-        if (totalWorth.equals("0.0")) {
+        double totalWorth = getTotalWorth(sellAll);
+        if (totalWorth == 0.0) {
 
             ItemStack error;
             if (sellAll) error = new ItemStack(EvenMoreFish.mainConfig.getSellAllErrorMaterial());
@@ -205,9 +214,13 @@ public class SellGUI implements InventoryHolder {
                 errorMeta.setDisplayName(new Message(ConfigMessage.WORTH_GUI_NO_VAL_BUTTON_NAME).getRawMessage(true, false));
 
             if (sellAll) {
-                errorMeta.setLore(new ArrayList<>(Arrays.asList(new Message(ConfigMessage.WORTH_GUI_SELL_BUTTON_LORE).getRawMessage(true, false).split("\n"))));
+                Message message = new Message(ConfigMessage.WORTH_GUI_SELL_BUTTON_LORE);
+                message.setSellPrice(formatWorth(0.0));
+                errorMeta.setLore(new ArrayList<>(Arrays.asList(message.getRawMessage(true, true).split("\n"))));
             } else {
-                errorMeta.setLore(new ArrayList<>(Arrays.asList(new Message(ConfigMessage.WORTH_GUI_NO_VAL_BUTTON_LORE).getRawMessage(true, false).split("\n"))));
+                Message message = new Message(ConfigMessage.WORTH_GUI_NO_VAL_BUTTON_LORE);
+                message.setSellPrice(formatWorth(0.0));
+                errorMeta.setLore(new ArrayList<>(Arrays.asList(message.getRawMessage(true, true).split("\n"))));
             }
 
             error.setItemMeta(errorMeta);
@@ -231,11 +244,11 @@ public class SellGUI implements InventoryHolder {
 
             if (sellAll) {
                 Message message = new Message(ConfigMessage.WORTH_GUI_SELL_ALL_BUTTON_LORE);
-                message.setSellPrice(getTotalWorth(true));
+                message.setSellPrice(String.valueOf(formatWorth(getTotalWorth(true))));
                 cMeta.setLore(Arrays.asList(message.getRawMessage(true, true).split("\n")));
             } else {
                 Message message = new Message(ConfigMessage.WORTH_GUI_SELL_LORE);
-                message.setSellPrice(getTotalWorth(false));
+                message.setSellPrice(String.valueOf(formatWorth(getTotalWorth(false))));
 
                 cMeta.setLore(new ArrayList<>(Arrays.asList(message.getRawMessage(true, true).split("\n"))));
             }
@@ -273,37 +286,72 @@ public class SellGUI implements InventoryHolder {
         }
 
     }
+    public List<SoldFish> getTotalSoldFish(boolean inventory) {
+        if (this.menu == null)
+            return Collections.emptyList();
 
-    public String getTotalWorth(boolean inventory) {
-        if (this.menu == null) return Double.toString(0.0d);
-
-
-        double totalValue = 0.0d;
-        int count = 0;
+        List<SoldFish> soldFish = new ArrayList<>();
 
         if (inventory) {
             for (ItemStack item : player.getInventory().getStorageContents()) {
                 // -1.0 is given when there's no worth NBT value
-                double itemValue = WorthNBT.getValue(item);
-                if (itemValue != -1.0) {
-                    totalValue += (itemValue * item.getAmount());
-                    count += item.getAmount();
+                SoldFish fish = getSoldFish(item);
+                if(fish != null) {
+                    soldFish.add(fish);
                 }
             }
         } else {
             for (ItemStack item : this.menu.getContents()) {
                 // -1.0 is given when there's no worth NBT value
-                double itemValue = WorthNBT.getValue(item);
-                if (itemValue != -1.0) {
-                    totalValue += (itemValue * item.getAmount());
-                    count += item.getAmount();
+                SoldFish fish = getSoldFish(item);
+                if(fish != null) {
+                    soldFish.add(fish);
                 }
             }
         }
+        return soldFish;
+    }
 
+    private @Nullable SoldFish getSoldFish(final ItemStack item) {
+        double itemValue = WorthNBT.getValue(item);
+        if (itemValue == -1.0) {
+            return null;
+        }
+
+        NBTItem nbtItem = new NBTItem(item);
+        final String fishName = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_NAME);
+        final String fishRarity = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_RARITY);
+        Float floatLength = NbtUtils.getFloat(nbtItem, NbtUtils.Keys.EMF_FISH_LENGTH);
+        final double fishLength = floatLength == null ? -1.0 : floatLength;
+        final double fishValue = WorthNBT.getValue(item);
+
+        return new SoldFish(fishName, fishRarity, item.getAmount(), fishValue * item.getAmount(), fishLength);
+    }
+
+
+    public double getTotalWorth(final List<SoldFish> soldFish) {
+        double totalValue = 0.0d;
+        int count = 0;
+        for(SoldFish sold: soldFish) {
+            totalValue += sold.getTotalValue();
+            count += sold.getAmount();
+        }
         this.value = totalValue;
         this.fishCount = count;
-        return Double.toString(Math.floor(totalValue * 10) / 10);
+
+        return Math.floor(totalValue * 10) / 10;
+    }
+
+    public double getTotalWorth(boolean inventory) {
+        return getTotalWorth(getTotalSoldFish(inventory));
+    }
+
+    public String formatWorth(double totalWorth) {
+        if (EvenMoreFish.mainConfig.getSellType().equals("money")) {
+            return "$" + totalWorth;
+        } else {
+            return (int) totalWorth + " Claim Blocks";
+        }
     }
 
     // will drop only non-fish items if the method is called from selling, and everything if it's just a gui close
@@ -352,12 +400,24 @@ public class SellGUI implements InventoryHolder {
     }
 
     public boolean sell(boolean sellAll) {
-        getTotalWorth(sellAll);
-        if (EvenMoreFish.econ != null) EvenMoreFish.econ.depositPlayer(this.player, value);
+        List<SoldFish> soldFish = getTotalSoldFish(sellAll);
+        double totalWorth = getTotalWorth(soldFish);
+        String sellType = EvenMoreFish.mainConfig.getSellType();
+        double sellPrice = Math.floor(totalWorth * 10) / 10;
+
+        if (sellType.equals("money")) {
+            if (EvenMoreFish.econ != null) {
+                EvenMoreFish.econ.depositPlayer(this.player, totalWorth);
+            }
+        } else if (sellType.equals("claimblocks")) {
+            PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(this.player.getUniqueId());
+            playerData.setBonusClaimBlocks((int) (playerData.getBonusClaimBlocks() + sellPrice));
+        }
 
         // sending the sell message to the player
+
         Message message = new Message(ConfigMessage.FISH_SALE);
-        message.setSellPrice(Double.toString(Math.floor(value * 10) / 10));
+        message.setSellPrice(formatWorth(sellPrice));
         message.setAmount(Integer.toString(fishCount));
         message.setPlayer(this.player.toString());
         message.broadcast(player, true, true);
@@ -377,12 +437,32 @@ public class SellGUI implements InventoryHolder {
                 }
             }
         }
+        if (EvenMoreFish.mainConfig.databaseEnabled() && EvenMoreFish.mainConfig.doingExperimentalFeatures()) logSoldFish(player.getUniqueId(),soldFish);
+        return totalWorth != 0.0;
+    }
 
-        return this.value != 0.0;
+    private void logSoldFish(final UUID uuid, @NotNull List<SoldFish> soldFish) {
+        int userId = EvenMoreFish.databaseV3.getUserID(uuid);
+        final String transactionId = FriendlyId.createFriendlyId();
+        final Timestamp timestamp = Timestamp.from(Instant.now());
+
+        EvenMoreFish.databaseV3.createTransaction(transactionId, userId, timestamp);
+        for(final SoldFish fish: soldFish) {
+            EvenMoreFish.databaseV3.createSale(transactionId, timestamp, userId, fish.getName(),fish.getRarity(), fish.getAmount(),fish.getLength(), fish.getTotalValue());
+        }
+
+        double moneyEarned = getTotalWorth(soldFish);
+        int fishSold = calcFishSold(soldFish);
+        DataManager.getInstance().getUserReportIfExists(uuid).incrementFishSold(fishSold);
+        DataManager.getInstance().getUserReportIfExists(uuid).incrementMoneyEarned(moneyEarned);
+    }
+
+    private int calcFishSold(@NotNull List<SoldFish> soldFish) {
+        return soldFish.stream().mapToInt(SoldFish::getAmount).sum();
     }
 
     @Override
-    public Inventory getInventory() {
+    public @NotNull Inventory getInventory() {
         return menu;
     }
 }

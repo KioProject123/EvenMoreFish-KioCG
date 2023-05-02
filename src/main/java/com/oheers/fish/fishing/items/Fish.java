@@ -42,6 +42,7 @@ public class Fish implements Cloneable {
     List<Requirement> requirements = new ArrayList<>();
 
     boolean wasBaited;
+    boolean silent;
 
     List<String> allowedRegions;
 
@@ -77,17 +78,14 @@ public class Fish implements Cloneable {
         checkDisplayName();
 
         // These settings don't mean these will be applied, but they will be considered if the settings exist.
-        factory.setItemModelDataCheck(true);
-        factory.setItemDamageCheck(true);
+        factory.enableDefaultChecks();
         factory.setItemDisplayNameCheck(this.displayName != null);
-        factory.setItemDyeCheck(true);
-        factory.setItemGlowCheck(true);
-        factory.setPotionMetaCheck(true);
 
         setSize();
         checkEatEvent();
         checkIntEvent();
         checkDisplayName();
+        checkSilent();
 
         fishRewards = new ArrayList<>();
         checkFishEvent();
@@ -327,6 +325,13 @@ public class Fish implements Cloneable {
         }
     }
 
+    /**
+     * Checks if the fish has silent: true enabled, which stops the "You caught ... fish" from being broadcasted to anyone.
+     */
+    public void checkSilent() {
+        this.silent = this.fishConfig.getBoolean("fish." + this.rarity.getValue() + "." + this.name + ".silent", false);
+    }
+
     @Override
     public Fish clone() throws CloneNotSupportedException {
         return (Fish) super.clone();
@@ -422,5 +427,13 @@ public class Fish implements Cloneable {
 
     public boolean isXmasFish() {
         return xmasFish;
+    }
+
+    public boolean isSilent() {
+        return silent;
+    }
+
+    public void setSilent(boolean silent) {
+        this.silent = silent;
     }
 }

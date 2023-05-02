@@ -21,12 +21,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
 
 public class CommandCentre implements TabCompleter, CommandExecutor {
 
@@ -44,6 +42,7 @@ public class CommandCentre implements TabCompleter, CommandExecutor {
                 "clearbaits",
                 "competition",
                 "fish",
+                "nbt-rod",
                 "reload",
                 "version"
         );
@@ -57,7 +56,9 @@ public class CommandCentre implements TabCompleter, CommandExecutor {
                 "help",
                 "shop",
                 "toggle",
-                "top"));
+                "top",
+                "gui")
+        );
 
         if (EvenMoreFish.xmas2022Config.isAvailable()) emfTabs.add("xmas");
 
@@ -177,14 +178,7 @@ public class CommandCentre implements TabCompleter, CommandExecutor {
 
                         @Override
                         public void run() {
-                            try {
-                                EvenMoreFish.databaseV3.getConnection();
-                                EvenMoreFish.databaseV3.migrate(sender);
-                                EvenMoreFish.databaseV3.closeConnection();
-                            } catch (SQLException exception) {
-                                EvenMoreFish.logger.log(Level.SEVERE, "Critical SQL/interruption error whilst upgrading to v3 engine.");
-                                exception.printStackTrace();
-                            }
+                            EvenMoreFish.databaseV3.migrateLegacy(sender);
                         }
                     }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(CommandCentre.class));
                 }
@@ -456,6 +450,36 @@ class Controls {
 
                 break;
 
+            case "nbt-rod": {
+                if (!EvenMoreFish.mainConfig.requireNBTRod()) {
+                    new Message(ConfigMessage.ADMIN_NBT_NOT_REQUIRED).broadcast(sender, true, false);
+                    return;
+                }
+                Player player;
+                Message giveMessage;
+                if (args.length == 3 && args[2].startsWith("-p:")) {
+                    if ((player = Bukkit.getPlayer(args[2].substring(3))) == null) {
+                        Message errorMessage = new Message(ConfigMessage.ADMIN_UNKNOWN_PLAYER);
+                        errorMessage.setPlayer(args[2].substring(3));
+                        errorMessage.broadcast(sender, true, true);
+                        return;
+                    }
+                    giveMessage = new Message(ConfigMessage.ADMIN_NBT_ROD_GIVEN);
+                    giveMessage.setPlayer(player.getName());
+                } else {
+                    if (!(sender instanceof Player)) {
+                        Message errorMessage = new Message(ConfigMessage.ADMIN_CANT_BE_CONSOLE);
+                        errorMessage.broadcast(sender, false, false);
+                        return;
+                    }
+                    player = (Player) sender;
+                }
+
+                FishUtils.giveItems(Collections.singletonList(EvenMoreFish.customNBTRod), player);
+                giveMessage = new Message(ConfigMessage.ADMIN_NBT_ROD_GIVEN);
+                giveMessage.setPlayer(player.getName());
+                giveMessage.broadcast(sender, true, true);
+                break; }
             case "bait":
                 if (args.length >= 3) {
 

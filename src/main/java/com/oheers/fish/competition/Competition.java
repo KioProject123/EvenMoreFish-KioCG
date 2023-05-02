@@ -21,7 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.sql.SQLException;
 import java.time.Instant;
 import java.util.*;
 import java.util.logging.Level;
@@ -115,18 +114,11 @@ public class Competition {
         if (EvenMoreFish.mainConfig.databaseEnabled() && EvenMoreFish.mainConfig.doingExperimentalFeatures()) {
             Competition competitionRef = this;
             new BukkitRunnable() {
-
+            
                 @Override
                 public void run() {
-                    try {
-                        EvenMoreFish.databaseV3.getConnection();
-                        EvenMoreFish.databaseV3.createCompetitionReport(competitionRef);
-                        EvenMoreFish.databaseV3.closeConnection();
-                        leaderboard.clear();
-                    } catch (SQLException exception) {
-                        EvenMoreFish.logger.log(Level.SEVERE, "Failed SQL operations whilst writing competition data for " + competitionRef.getCompetitionName() + ". Try restarting or contacting support.");
-                        exception.printStackTrace();
-                    }
+                    EvenMoreFish.databaseV3.createCompetitionReport(competitionRef);
+                    leaderboard.clear();
                 }
             }.runTaskAsynchronously(JavaPlugin.getProvidingPlugin(Competition.class));
         } else {

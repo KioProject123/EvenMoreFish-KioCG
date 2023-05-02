@@ -9,6 +9,8 @@ public enum ConfigMessage {
     ADMIN_GIVE_PLAYER_BAIT("admin.given-player-bait", "&rYou have given {player} a {bait}.", PrefixType.ADMIN, true, true),
     ADMIN_GIVE_PLAYER_FISH("admin.given-player-fish", "&rYou have given {player} a {fish}.", PrefixType.ADMIN, true, true),
     ADMIN_OPEN_FISH_SHOP("admin.open-fish-shop", "&rOpened a shop inventory for {player}.", PrefixType.ADMIN, true, true),
+    ADMIN_NBT_ROD_GIVEN("admin.nbt-rod-given", "&rYou have given {player} a NBT rod, make sure \"require-nbt-rod\" is set to &atrue &rfor this to be different from any other fishing rod.", PrefixType.ADMIN, true, true),
+    ADMIN_NBT_NOT_REQUIRED("admin.nbt-not-required", "&rChange \"require-nbt-rod\" to true in order to use this feature.", PrefixType.ERROR, false, true),
     ADMIN_NO_BAIT_SPECIFIED("admin.no-bait-specified", "&rYou must specify a bait name.", PrefixType.ERROR, false, true),
     ADMIN_NOT_HOLDING_ROD("admin.must-be-holding-rod", "&rYou need to be holding a fishing rod to run that command.", PrefixType.ERROR, false, false),
     ADMIN_NUMBER_FORMAT_ERROR("admin.number-format-error", "&r{amount} is not a valid number.", PrefixType.ERROR, false, true),
@@ -60,7 +62,7 @@ public enum ConfigMessage {
     LENGTH_LORE("length-lore", Arrays.asList(
             "&fMeasures {length}cm"
     ), PrefixType.NONE, false, false),
-    FISH_SALE("fish-sale", "&rYou've sold &a{amount} &ffish for &a${sell-price}&f.", PrefixType.DEFAULT, true, true),
+    FISH_SALE("fish-sale", "&rYou've sold &a{amount} &ffish for &a{sell-price}&f.", PrefixType.DEFAULT, true, true),
 
     HELP_GENERAL("help-general", Arrays.asList(
             "&f&m &#f1ffed&m &#e2ffdb&m &#d3ffc9&m &#c3ffb7&m &#b2ffa5&m &#9fff92&m &#8bff7f&m &#73ff6b&m &a&m &f &a&lEvenMoreFish &a&m &#73ff6b&m&m &#8bff7f&m &#9fff92&m &#b2ffa5&m &#c3ffb7&m &#d3ffc9&m &#e2ffdb&m &#f1ffed&m &f&m &f",
@@ -123,7 +125,7 @@ public enum ConfigMessage {
     WORTH_GUI_NO_VAL_BUTTON_LORE("error-gui-lore", Arrays.asList(
             "&8Fish Shop",
             "",
-            "&7Total Value » &c$0",
+            "&7Total Value » &c{sell-price}",
             "",
             "&7Sell your fish here to make",
             "&7some extra money.",
@@ -140,7 +142,7 @@ public enum ConfigMessage {
     WORTH_GUI_SELL_BUTTON_LORE("error-sell-all-gui-lore", Arrays.asList(
             "&8Inventory",
             "",
-            "&7Total Value » &c$0",
+            "&7Total Value » &c{sell-price}",
             "",
             "&7Click this button to sell",
             "&7the fish in your inventory to",
@@ -151,7 +153,7 @@ public enum ConfigMessage {
     WORTH_GUI_SELL_LORE("sell-gui-lore", Arrays.asList(
             "&8Fish Shop",
             "",
-            "&7Total Value » &e${sell-price}",
+            "&7Total Value » &e{sell-price}",
             "",
             "&7Sell your fish here to make",
             "&7some extra money.",

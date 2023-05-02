@@ -20,7 +20,10 @@ import com.oheers.fish.gui.FillerStyle;
 import com.oheers.fish.selling.InteractHandler;
 import com.oheers.fish.selling.SellGUI;
 import com.oheers.fish.utils.AntiCraft;
+import com.oheers.fish.utils.ItemFactory;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import de.tr7zw.changeme.nbtapi.NBTCompound;
+import de.tr7zw.changeme.nbtapi.NBTItem;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.bstats.bukkit.Metrics;
@@ -29,6 +32,7 @@ import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -36,7 +40,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -45,8 +48,8 @@ import java.util.logging.Logger;
 public class EvenMoreFish extends JavaPlugin {
 
     public static final int METRIC_ID = 11054;
-    public static final int MSG_CONFIG_VERSION = 12;
-    public static final int MAIN_CONFIG_VERSION = 11;
+    public static final int MSG_CONFIG_VERSION = 13;
+    public static final int MAIN_CONFIG_VERSION = 14;
     public static final int COMP_CONFIG_VERSION = 1;
     public static FishFile fishFile;
     public static RaritiesFile raritiesFile;
@@ -65,6 +68,7 @@ public class EvenMoreFish extends JavaPlugin {
     public static Rarity xmasRarity;
     public final static Map<Integer, Fish> xmasFish = new HashMap<>();
     public static List<UUID> disabledPlayers = new ArrayList<>();
+    public static ItemStack customNBTRod;
     public static boolean checkingEatEvent;
     public static boolean checkingIntEvent;
     // Do some fish in some rarities have the comp-check-exempt: true.
@@ -123,6 +127,10 @@ public class EvenMoreFish extends JavaPlugin {
         if (guiConfig != null) guiFillerStyle = guiConfig.getFillerStyle("main-menu");
 
         usingPAPI = getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
+
+        if (mainConfig.requireNBTRod()) {
+            customNBTRod = createCustomNBTRod();
+        }
 
         if (mainConfig.isEconomyEnabled()) {
             // could not set up economy.
@@ -183,26 +191,18 @@ public class EvenMoreFish extends JavaPlugin {
             DataManager.init();
 
             databaseV3 = new DatabaseV3(this);
+            //load user reports into cache
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    try {
-                        databaseV3.getConnection();
-                        try {
-                            EvenMoreFish.databaseV3.createTables(false);
-                        } catch (SQLException exception) {
-                            EvenMoreFish.logger.log(Level.SEVERE, "Failed to create new tables or check for present tables.");
-                            exception.printStackTrace();
+                    EvenMoreFish.databaseV3.createTables(false);
+                    for (Player player : getServer().getOnlinePlayers()) {
+                        UserReport playerReport = databaseV3.readUserReport(player.getUniqueId());
+                        if (playerReport == null) {
+                            EvenMoreFish.logger.warning("Could not read report for player (" + player.getUniqueId() + ")");
+                            continue;
                         }
-
-                        for (Player player : getServer().getOnlinePlayers()) {
-                            DataManager.getInstance().putUserReportCache(player.getUniqueId(), databaseV3.readUserReport(player.getUniqueId()));
-                        }
-
-                        databaseV3.closeConnection();
-                    } catch (SQLException exception) {
-                        logger.log(Level.SEVERE, "Failed SQL operations whilst enabling plugin. Try restarting or contacting support.");
-                        exception.printStackTrace();
+                        DataManager.getInstance().putUserReportCache(player.getUniqueId(), playerReport);
                     }
                 }
             }.runTaskAsynchronously(this);
@@ -214,7 +214,6 @@ public class EvenMoreFish extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
         terminateSellGUIS();
         saveUserData();
 
@@ -223,8 +222,10 @@ public class EvenMoreFish extends JavaPlugin {
             active.end();
         }
 
+        if (mainConfig.databaseEnabled() && mainConfig.doingExperimentalFeatures()) {
+            databaseV3.shutdown();
+        }
         logger.log(Level.INFO, "EvenMoreFish by Oheers : Disabled");
-
     }
 
     private void listeners() {
@@ -321,36 +322,51 @@ public class EvenMoreFish extends JavaPlugin {
             }
         });
     }
-
+    
     private void saveUserData() {
-        if (EvenMoreFish.mainConfig.doingExperimentalFeatures() && mainConfig.isDatabaseOnline()) {
-            try {
-                databaseV3.getConnection();
-                ConcurrentMap<UUID, List<FishReport>> allReports = DataManager.getInstance().getAllFishReports();
-                for (UUID uuid : allReports.keySet()) {
-                    databaseV3.writeFishReports(uuid, allReports.get(uuid));
-
-                    try {
-                        if (!databaseV3.hasUser(uuid, Table.EMF_USERS)) {
-                            databaseV3.createUser(uuid);
-                        }
-                    } catch (InvalidTableException exception) {
-                        logger.log(Level.SEVERE, "Fatal error when storing data for " + uuid + ", their data in primary storage has been deleted.");
-                    }
-                }
-
-                for (UserReport report : DataManager.getInstance().getAllUserReports()) {
-                    databaseV3.writeUserReport(report.getUUID(), report);
-                }
-                databaseV3.closeConnection();
-
-            } catch (SQLException exception) {
-                logger.log(Level.SEVERE, "Failed to save all user data.");
-                exception.printStackTrace();
-            }
-
-            DataManager.getInstance().uncacheAll();
+        //really slow, we should execute this via a runnable.
+        if (!(EvenMoreFish.mainConfig.doingExperimentalFeatures() && mainConfig.isDatabaseOnline())) {
+            return;
         }
+        
+        saveFishReports();
+        saveUserReports();
+        
+        DataManager.getInstance().uncacheAll();
+    }
+    
+    private void saveFishReports() {
+        ConcurrentMap<UUID, List<FishReport>> allReports = DataManager.getInstance().getAllFishReports();
+        logger.info("Saving " + allReports.keySet().size() + " fish reports.");
+        for (Map.Entry<UUID, List<FishReport>> entry : allReports.entrySet()) {
+            databaseV3.writeFishReports(entry.getKey(), entry.getValue());
+        
+            try {
+                if (!databaseV3.hasUser(entry.getKey(), Table.EMF_USERS)) {
+                    databaseV3.createUser(entry.getKey());
+                }
+            } catch (InvalidTableException exception) {
+                logger.log(Level.SEVERE, "Fatal error when storing data for " + entry.getKey() + ", their data in primary storage has been deleted.");
+            }
+        }
+    }
+    
+    private void saveUserReports() {
+        logger.info("Saving " + DataManager.getInstance().getAllUserReports().size() + " user reports.");
+        for (UserReport report : DataManager.getInstance().getAllUserReports()) {
+            databaseV3.writeUserReport(report.getUUID(), report);
+        }
+    }
+
+    public ItemStack createCustomNBTRod() {
+        ItemFactory itemFactory = new ItemFactory("nbt-rod-item", false);
+        itemFactory.enableDefaultChecks();
+        itemFactory.setItemDisplayNameCheck(true);
+        itemFactory.setItemLoreCheck(true);
+        NBTItem nbtItem = new NBTItem(itemFactory.createItem(null, 0));
+        NBTCompound emfCompound = nbtItem.getOrCreateCompound(NbtUtils.Keys.EMF_COMPOUND);
+        emfCompound.setBoolean(NbtUtils.Keys.EMF_ROD_NBT, true);
+        return nbtItem.getItem();
     }
 
     public void reload() {
@@ -381,6 +397,10 @@ public class EvenMoreFish extends JavaPlugin {
         if (mainConfig.debugSession()) guiConfig.reload();
 
         competitionWorlds = competitionConfig.getRequiredWorlds();
+
+        if (mainConfig.requireNBTRod()) {
+            customNBTRod = createCustomNBTRod();
+        }
 
         competitionQueue.load();
     }
