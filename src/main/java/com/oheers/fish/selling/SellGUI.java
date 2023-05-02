@@ -289,9 +289,9 @@ public class SellGUI implements InventoryHolder {
     public List<SoldFish> getTotalSoldFish(boolean inventory) {
         if (this.menu == null)
             return Collections.emptyList();
-
+        
         List<SoldFish> soldFish = new ArrayList<>();
-
+        
         if (inventory) {
             for (ItemStack item : player.getInventory().getStorageContents()) {
                 // -1.0 is given when there's no worth NBT value
@@ -311,24 +311,24 @@ public class SellGUI implements InventoryHolder {
         }
         return soldFish;
     }
-
+    
     private @Nullable SoldFish getSoldFish(final ItemStack item) {
         double itemValue = WorthNBT.getValue(item);
         if (itemValue == -1.0) {
             return null;
         }
-
+        
         NBTItem nbtItem = new NBTItem(item);
         final String fishName = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_NAME);
         final String fishRarity = NbtUtils.getString(nbtItem, NbtUtils.Keys.EMF_FISH_RARITY);
         Float floatLength = NbtUtils.getFloat(nbtItem, NbtUtils.Keys.EMF_FISH_LENGTH);
         final double fishLength = floatLength == null ? -1.0 : floatLength;
         final double fishValue = WorthNBT.getValue(item);
-
+        
         return new SoldFish(fishName, fishRarity, item.getAmount(), fishValue * item.getAmount(), fishLength);
     }
-
-
+    
+    
     public double getTotalWorth(final List<SoldFish> soldFish) {
         double totalValue = 0.0d;
         int count = 0;
@@ -338,7 +338,7 @@ public class SellGUI implements InventoryHolder {
         }
         this.value = totalValue;
         this.fishCount = count;
-
+        
         return Math.floor(totalValue * 10) / 10;
     }
 
@@ -440,7 +440,7 @@ public class SellGUI implements InventoryHolder {
         if (EvenMoreFish.mainConfig.databaseEnabled() && EvenMoreFish.mainConfig.doingExperimentalFeatures()) logSoldFish(player.getUniqueId(),soldFish);
         return totalWorth != 0.0;
     }
-
+    
     private void logSoldFish(final UUID uuid, @NotNull List<SoldFish> soldFish) {
         int userId = EvenMoreFish.databaseV3.getUserID(uuid);
         final String transactionId = FriendlyId.createFriendlyId();
@@ -450,13 +450,13 @@ public class SellGUI implements InventoryHolder {
         for(final SoldFish fish: soldFish) {
             EvenMoreFish.databaseV3.createSale(transactionId, timestamp, userId, fish.getName(),fish.getRarity(), fish.getAmount(),fish.getLength(), fish.getTotalValue());
         }
-
+        
         double moneyEarned = getTotalWorth(soldFish);
         int fishSold = calcFishSold(soldFish);
         DataManager.getInstance().getUserReportIfExists(uuid).incrementFishSold(fishSold);
         DataManager.getInstance().getUserReportIfExists(uuid).incrementMoneyEarned(moneyEarned);
     }
-
+    
     private int calcFishSold(@NotNull List<SoldFish> soldFish) {
         return soldFish.stream().mapToInt(SoldFish::getAmount).sum();
     }

@@ -54,16 +54,12 @@ public class InteractHandler implements Listener {
                 Bukkit.dispatchCommand(event.getWhoClicked(), "menu");
                 event.setCancelled(true);
             } else if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
+                // cancels on right click
                 if (event.getClick() != ClickType.LEFT) {
                     event.setCancelled(true);
+                    // gui.close(); // KioCG - 不要关闭面板
                     return;
                 }
-                // cancels on right click
-//                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-//                    event.setCancelled(true);
-//                    gui.close();
-//                    return;
-//                }
 
                 // makes the player confirm their choice
                 gui.createIcon(false);
@@ -91,7 +87,7 @@ public class InteractHandler implements Listener {
                 }
 
                 gui.sell(true);
-                // gui.close(); KioCG - 不要关闭面板
+                // gui.close(); // KioCG - 不要关闭面板
                 event.setCancelled(true); // KioCG - 这是缺少的吗?
                 gui.updateSellItem();
                 gui.updateSellAllItem();
@@ -100,17 +96,12 @@ public class InteractHandler implements Listener {
 
                 gui.error = false;
             } else if (clickedItem.isSimilar(gui.getConfirmIcon())) {
+                // cancels on right click
                 if (event.getClick() != ClickType.LEFT) {
                     event.setCancelled(true);
+                    // gui.close(); // KioCG - 不要关闭面板
                     return;
                 }
-
-                // cancels on right click
-//                if (event.getAction().equals(InventoryAction.PICKUP_HALF)) {
-//                    event.setCancelled(true);
-//                    gui.close();
-//                    return;
-//                }
 
                 event.setCancelled(true);
                 if (gui.getModified()) {
@@ -122,7 +113,7 @@ public class InteractHandler implements Listener {
                     gui.setModified(false);
                 } else {
                     gui.sell(false);
-                    // gui.close(); KioCG - 不要关闭面板
+                    // gui.close(); // KioCG - 不要关闭面板
                     gui.updateSellItem();
                     gui.updateSellAllItem();
                     gui.setModified(true);
