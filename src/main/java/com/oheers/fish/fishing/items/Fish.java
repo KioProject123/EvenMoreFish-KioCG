@@ -11,11 +11,13 @@ import com.oheers.fish.selling.WorthNBT;
 import com.oheers.fish.utils.ItemFactory;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -129,6 +131,9 @@ public class Fish implements Cloneable {
             fishMeta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
             fishMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             fishMeta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+
+            // 防止鱼堆叠
+            fishMeta.getPersistentDataContainer().set(new NamespacedKey(EvenMoreFish.getInstance(), "FishUUID"), PersistentDataType.STRING, UUID.randomUUID().toString());
 
             fish.setItemMeta(fishMeta);
 

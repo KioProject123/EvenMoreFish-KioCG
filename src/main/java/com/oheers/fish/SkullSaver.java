@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.logging.Level;
 
 public class SkullSaver implements Listener {
-    
+    /*
     // EventPriority.HIGHEST makes this run last so it can listen to the cancels of protection plugins like Towny
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
@@ -98,5 +98,5 @@ public class SkullSaver implements Listener {
     private boolean isHead(final Block block) {
         return block.getType() == Material.PLAYER_HEAD || block.getType() == Material.PLAYER_WALL_HEAD;
     }
-    
+     */
 }
