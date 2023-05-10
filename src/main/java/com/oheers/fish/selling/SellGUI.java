@@ -80,6 +80,12 @@ public class SellGUI implements InventoryHolder {
     }
 
     public void addFiller(ItemStack fill) {
+        for (int i = 0; i < 9; i++) {
+            ItemStack item = menu.getItem(i);
+            if (item == null || item.isSimilar(filler) || item.isSimilar(errorFiller)) {
+                menu.setItem(i, fill);
+            }
+        }
         for (int i = guiSize - 9; i < guiSize; i++) {
             ItemStack item = menu.getItem(i);
             if (item == null || item.isSimilar(filler) || item.isSimilar(errorFiller)) {
