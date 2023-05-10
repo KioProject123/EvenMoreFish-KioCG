@@ -50,10 +50,7 @@ public class InteractHandler implements Listener {
         } else {
             // determines what the player has clicked, or if they've just added an item
             // to the menu
-            if (clickedItem.isSimilar(gui.getMenuIcon())) {
-                Bukkit.dispatchCommand(event.getWhoClicked(), "menu");
-                event.setCancelled(true);
-            } else if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
+            if (clickedItem.isSimilar(gui.getSellIcon()) || clickedItem.isSimilar(gui.getErrorIcon())) {
                 // cancels on right click
                 if (event.getClick() != ClickType.LEFT) {
                     event.setCancelled(true);

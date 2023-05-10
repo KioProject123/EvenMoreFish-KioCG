@@ -46,9 +46,6 @@ public class SellGUI implements InventoryHolder {
 
     private ItemStack sellIcon, sellAllIcon, filler, errorFiller, confirmIcon, confirmSellAllIcon, noValueIcon, sellAllErrorIcon;
 
-    // 添加返回主菜单按钮
-    private ItemStack menuIcon;
-
     public SellGUI(Player p) {
         this.guiSize = (EvenMoreFish.mainConfig.getGUISize() + 1) * 9;
         this.player = p;
@@ -58,7 +55,6 @@ public class SellGUI implements InventoryHolder {
         addFiller(filler);
         setSellItem();
         setSellAllItem();
-        setMenuItem();
         this.player.openInventory(menu);
     }
 
@@ -150,28 +146,12 @@ public class SellGUI implements InventoryHolder {
         menu.setItem(guiSize - (10 - EvenMoreFish.mainConfig.getSellSlot()), this.sellIcon);
     }
 
-    public void setMenuItem() {
-        ItemStack mIcon = new ItemStack(Material.WRITABLE_BOOK);
-
-        ItemMeta menuMeta = mIcon.getItemMeta();
-        menuMeta.setDisplayName("§e↩ §c返回主菜单");
-
-        mIcon.setItemMeta(menuMeta);
-
-        this.menuIcon = WorthNBT.attributeDefault(mIcon);
-        menu.setItem(guiSize - 5, this.menuIcon);
-    }
-
     /**
      * Resets the glass colour to the default one after the error glass has been used due to a value of $0 in the shop.
      * This prevents the red from hanging when the gold ingot / raw fish cod have returned.
      */
     public void resetGlassColour() {
         addFiller(this.filler);
-    }
-
-    public ItemStack getMenuIcon() {
-        return this.menuIcon;
     }
 
     public ItemStack getSellIcon() {
@@ -264,7 +244,6 @@ public class SellGUI implements InventoryHolder {
     }
 
     public void setIcon(boolean sellAll) {
-        menu.setItem(guiSize - 5, this.menuIcon); // KioCG - 添加返回主菜单按钮
         if (this.error) {
             if (sellAll) {
                 this.menu.setItem(guiSize - (10 - EvenMoreFish.mainConfig.getSellAllSlot()), this.sellAllErrorIcon);
