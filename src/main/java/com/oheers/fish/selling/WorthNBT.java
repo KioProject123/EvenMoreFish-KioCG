@@ -21,7 +21,7 @@ public class WorthNBT {
 
         NBTCompound emfCompound = nbtItem.getOrCreateCompound(NbtUtils.Keys.EMF_COMPOUND);
         if (fish.getLength() > 0)
-            emfCompound.setFloat(NbtUtils.Keys.EMF_FISH_LENGTH, fish.getLength());
+            emfCompound.setFloat(NbtUtils.Keys.EMF_FISH_LENGTH, (float) ((int)(fish.maxSize + fish.minSize) / 2)); // KioCG - 取平均长度
 //        if (!fish.hasFishermanDisabled() && fish.getFisherman() != null)
 //            emfCompound.setString(NbtUtils.Keys.EMF_FISH_PLAYER, fish.getFisherman().toString());
         emfCompound.setString(NbtUtils.Keys.EMF_FISH_NAME, fish.getName());
@@ -43,7 +43,7 @@ public class WorthNBT {
         PersistentDataContainer itemMeta = fishSkull.getPersistentDataContainer();
 
         if (fish.getLength() > 0)
-            itemMeta.set(nbtlength, PersistentDataType.FLOAT, fish.getLength());
+            itemMeta.set(nbtlength, PersistentDataType.FLOAT, (float) ((int)(fish.maxSize + fish.minSize) / 2)); // KioCG - 取平均长度
 //        if (fish.getFisherman() != null && !fish.hasFishermanDisabled())
 //            itemMeta.set(nbtplayer, PersistentDataType.STRING, fish.getFisherman().toString());
 //        itemMeta.set(nbtrandomIndex, PersistentDataType.INTEGER, fish.getFactory().getChosenRandomIndex());
