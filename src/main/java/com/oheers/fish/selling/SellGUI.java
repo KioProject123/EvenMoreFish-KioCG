@@ -7,7 +7,6 @@ import com.oheers.fish.NbtUtils;
 import com.oheers.fish.config.messages.ConfigMessage;
 import com.oheers.fish.config.messages.Message;
 import com.oheers.fish.database.DataManager;
-import com.oheers.fish.utils.ItemFactory;
 import de.tr7zw.changeme.nbtapi.NBTItem;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
@@ -26,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.*;
 
@@ -333,7 +333,8 @@ public class SellGUI implements InventoryHolder {
 
     public String formatWorth(double totalWorth) {
         if (EvenMoreFish.mainConfig.getSellType().equals("money")) {
-            return "$" + totalWorth;
+            DecimalFormat format = new DecimalFormat(new Message(ConfigMessage.SELL_PRICE_FORMAT).getRawMessage(false, false));
+            return format.format(totalWorth);
         } else {
             return (int) totalWorth + " Claim Blocks";
         }

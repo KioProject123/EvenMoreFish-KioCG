@@ -3,6 +3,7 @@ package com.oheers.fish.config;
 import com.oheers.fish.EvenMoreFish;
 
 import java.io.*;
+import java.util.logging.Level;
 
 public class ConfigUpdater {
 
@@ -25,7 +26,12 @@ public class ConfigUpdater {
             "# Would you like to test out new experimental features? These are partially working features such as the database that\n" +
             "# may not work on all servers.\n" +
             "experimental-features: false";
-
+    private static String MSG_UPDATE_15 = "\n# The sell price:\n" +
+            "# 0 – prints a digit if provided, 0 otherwise\n" +
+            "# # – prints a digit if provided, nothing otherwise\n" +
+            "# . – indicate where to put the decimal separator\n" +
+            "# , – indicate where to put the grouping separator\n" +
+            "sell-price-format: \"#,##0.0\"";
     private static String MSG_UPDATE_13 = "\n" +
             "admin:\n" +
             "  # When the command /emf admin nbt-rod is run.\n" +
@@ -198,6 +204,10 @@ public class ConfigUpdater {
                     "  sell-over-drop: false";
 
     public static void updateMessages(int version) throws IOException {
+        if (version == 13) { // This version does its own config-version update.
+            getMessageUpdates(13);
+            return;
+        }
         File messagesFile = new File(EvenMoreFish.getProvidingPlugin(EvenMoreFish.class).getDataFolder().getPath() + "\\messages.yml");
         if (messagesFile.exists()) {
             try (BufferedReader file = new BufferedReader(new FileReader(messagesFile))) {
@@ -261,6 +271,14 @@ public class ConfigUpdater {
                 update.append(MSG_UPDATE_12);
             case 12:
                 update.append(MSG_UPDATE_13);
+            case 13:
+                try {
+                    insertCurrencySymbol(13);
+                } catch (IOException exception) {
+                    EvenMoreFish.logger.log(Level.WARNING, "Could not update messages.yml");
+                }
+            case 14:
+                update.append(MSG_UPDATE_15);
         }
 
         update.append(UPDATE_ALERT);
@@ -293,6 +311,30 @@ public class ConfigUpdater {
         return update.toString();
     }
 
+    private static void insertCurrencySymbol(int version) throws IOException {
+        File messagesFile = new File(EvenMoreFish.getProvidingPlugin(EvenMoreFish.class).getDataFolder().getPath() + "\\messages.yml");
+        if (messagesFile.exists()) {
+            try (BufferedReader file = new BufferedReader(new FileReader(messagesFile))) {
+
+                StringBuilder inputBuffer = new StringBuilder();
+                String line;
+
+                while ((line = file.readLine()) != null) {
+                    if (line.contains("{sell-price}")) {
+                        line = line.replace("{sell-price}", "${sell-price}");
+                    } else if (line.equals("config-version: " + version)) {
+                        line = "config-version: " + EvenMoreFish.MSG_CONFIG_VERSION; // replace the line here
+                    }
+                    inputBuffer.append(line);
+                    inputBuffer.append('\n');
+                }
+                // write the new string with the replaced line OVER the same file
+                FileOutputStream fileOut = new FileOutputStream(messagesFile);
+                fileOut.write(inputBuffer.toString().getBytes());
+            }
+        }
+    }
+
     /**
      * Removes all data from variables storing update strings to reduce memory usage in server memory.
      */
@@ -303,6 +345,7 @@ public class ConfigUpdater {
         MSG_UPDATE_11 = null;
         MSG_UPDATE_12 = null;
         MSG_UPDATE_13 = null;
+        MSG_UPDATE_15 = null;
 
         CONFIG_UPDATE_8 = null;
         CONFIG_UPDATE_9 = null;
