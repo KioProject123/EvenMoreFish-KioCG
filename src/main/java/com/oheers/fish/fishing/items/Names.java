@@ -198,7 +198,7 @@ public class Names {
             for (String s : requirementSection.getKeys(false)) {
                 switch (s.toLowerCase()) {
                     case "biome":
-                        currentRequirements.add(new Biome(configLocator + ".requirements.biome", config));
+                        currentRequirements.add(new Biome(configLocator + ".requirements.biome", config, name));
                         break;
                     case "irl-time":
                         currentRequirements.add(new IRLTime(configLocator + ".requirements.irl-time", config));

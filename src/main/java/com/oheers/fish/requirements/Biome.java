@@ -1,5 +1,6 @@
 package com.oheers.fish.requirements;
 
+import com.kiocg.java.utils.FetchBiomeData;
 import com.oheers.fish.EvenMoreFish;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ public class Biome implements Requirement {
     public final String configLocation;
     public final FileConfiguration fileConfig;
     public final List<org.bukkit.block.Biome> biomes = new ArrayList<>();
+    private final String fishName;
 
     /**
      * Checks the world for the current biome the player is stood in to figure out whether to give the player the fish
@@ -24,9 +26,10 @@ public class Biome implements Requirement {
      * @param fileConfig The file configuration to fetch file data from, this is either the rarities or fish.yml file,
      *                   but it would be possible to use any file, as long as the configLocation is correct.
      */
-    public Biome(@NotNull final String configLocation, @NotNull final FileConfiguration fileConfig) {
+    public Biome(@NotNull final String configLocation, @NotNull final FileConfiguration fileConfig, final String fishName) {
         this.configLocation = configLocation;
         this.fileConfig = fileConfig;
+        this.fishName = fishName;
         fetchData();
     }
 
@@ -44,6 +47,14 @@ public class Biome implements Requirement {
     public void fetchData() {
         // returns the biomes found in the "biomes:" section of the fish.yml
         for (String biome : EvenMoreFish.fishFile.getConfig().getStringList(configLocation)) {
+            if ("VOID".equals(biome) && fishName != null) {
+                this.biomes.addAll(FetchBiomeData.get(fishName));
+                if (this.biomes.isEmpty()) {
+                    EvenMoreFish.logger.log(Level.SEVERE, fishName + " 无法在任何群系中被捕获.");
+                }
+                return;
+            }
+
             try {
                 this.biomes.add(org.bukkit.block.Biome.valueOf(biome));
             } catch (IllegalArgumentException iae) {
