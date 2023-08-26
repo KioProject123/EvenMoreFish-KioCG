@@ -11,6 +11,7 @@ commands:
   evenmorefish:
     usage: /<command> [name]
     aliases: [ emf ]
+    permission: emf.command
 libraries:
   - com.zaxxer:HikariCP:${hikaricp.version}
   - org.flywaydb:flyway-core:${flyway.version}
