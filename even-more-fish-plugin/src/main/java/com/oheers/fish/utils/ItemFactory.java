@@ -396,13 +396,13 @@ public class ItemFactory {
     }
 
     public @NotNull ItemStack getItem(final @NotNull String materialString) throws Exception{
-        if (materialString.contains(":")) {
-            //assume this is an addon string
-            final String[] split = materialString.split(":", 2);
-            final String prefix = split[0];
-            final String id = split[1];
-            return EvenMoreFish.getInstance().getAddonManager().getItemStack(prefix,id);
-        }
+//        if (materialString.contains(":")) {
+//            //assume this is an addon string
+//            final String[] split = materialString.split(":", 2);
+//            final String prefix = split[0];
+//            final String id = split[1];
+//            return EvenMoreFish.getInstance().getAddonManager().getItemStack(prefix,id);
+//        }
 
 
         Material material = Material.matchMaterial(materialString);

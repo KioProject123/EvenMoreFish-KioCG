@@ -28,7 +28,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.spigot.api)
-    implementation(project(":even-more-fish-api"))
+//    implementation(project(":even-more-fish-api"))
     compileOnly(libs.vault.api)
     compileOnly(libs.placeholder.api)
     compileOnly(libs.authlib)
@@ -110,11 +110,11 @@ tasks {
     }
 
     clean {
-        doFirst {
-            for (file in File(project.projectDir ,"src/main/resources/addons").listFiles()!!) {
-                file.delete()
-            }
-        }
+//        doFirst {
+//            for (file in File(project.projectDir ,"src/main/resources/addons").listFiles()!!) {
+//                file.delete()
+//            }
+//        }
 
     }
 

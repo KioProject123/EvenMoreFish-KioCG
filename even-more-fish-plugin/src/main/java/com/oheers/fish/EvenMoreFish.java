@@ -1,9 +1,6 @@
 package com.oheers.fish;
 
-import com.oheers.fish.addons.AddonManager;
-import com.oheers.fish.addons.DefaultAddons;
 import com.oheers.fish.api.EMFAPI;
-import com.oheers.fish.api.plugin.EMFPlugin;
 import com.oheers.fish.baits.Bait;
 import com.oheers.fish.baits.BaitApplicationListener;
 import com.oheers.fish.competition.AutoRunner;
@@ -52,7 +49,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class EvenMoreFish extends JavaPlugin implements EMFPlugin {
+public class EvenMoreFish extends JavaPlugin {
     private Random random = new Random();
 
     public static final int METRIC_ID = 11054;
@@ -106,15 +103,15 @@ public class EvenMoreFish extends JavaPlugin implements EMFPlugin {
     public static FillerStyle guiFillerStyle;
     private EMFAPI api;
 
-    private AddonManager addonManager;
+//    private AddonManager addonManager;
 
     public static EvenMoreFish getInstance() {
         return instance;
     }
 
-    public AddonManager getAddonManager() {
-        return addonManager;
-    }
+//    public AddonManager getAddonManager() {
+//        return addonManager;
+//    }
 
     @Override
     public void onEnable() {
@@ -134,9 +131,9 @@ public class EvenMoreFish extends JavaPlugin implements EMFPlugin {
         mainConfig = new MainConfig(this);
         msgs = new Messages(this);
 
-        saveAdditionalDefaultAddons();
-        this.addonManager = new AddonManager(this);
-        this.addonManager.load();
+//        saveAdditionalDefaultAddons();
+//        this.addonManager = new AddonManager(this);
+//        this.addonManager.load();
 
         fishFile = new FishFile(this);
         raritiesFile = new RaritiesFile(this);
@@ -252,26 +249,26 @@ public class EvenMoreFish extends JavaPlugin implements EMFPlugin {
         logger.log(Level.INFO, "EvenMoreFish by Oheers : Disabled");
     }
 
-    private void saveAdditionalDefaultAddons() {
-        if (!mainConfig.useAdditionalAddons()) {
-            return;
-        }
-
-        for (final String fileName : Arrays.stream(DefaultAddons.values())
-                .map(DefaultAddons::getFullFileName)
-                .collect(Collectors.toList())) {
-            final File addonFile = new File(getDataFolder(), "addons/" + fileName);
-            final File jarFile = new File(getDataFolder(), "addons/" + fileName.replace(".addon", ".jar"));
-            if (!jarFile.exists()) {
-                try {
-                    this.saveResource("addons/" + fileName, true);
-                    addonFile.renameTo(jarFile);
-                } catch (IllegalArgumentException e) {
-                    debug(Level.WARNING, String.format("Default addon %s does not exist.", fileName));
-                }
-            }
-        }
-    }
+//    private void saveAdditionalDefaultAddons() {
+//        if (!mainConfig.useAdditionalAddons()) {
+//            return;
+//        }
+//
+//        for (final String fileName : Arrays.stream(DefaultAddons.values())
+//                .map(DefaultAddons::getFullFileName)
+//                .collect(Collectors.toList())) {
+//            final File addonFile = new File(getDataFolder(), "addons/" + fileName);
+//            final File jarFile = new File(getDataFolder(), "addons/" + fileName.replace(".addon", ".jar"));
+//            if (!jarFile.exists()) {
+//                try {
+//                    this.saveResource("addons/" + fileName, true);
+//                    addonFile.renameTo(jarFile);
+//                } catch (IllegalArgumentException e) {
+//                    debug(Level.WARNING, String.format("Default addon %s does not exist.", fileName));
+//                }
+//            }
+//        }
+//    }
 
     public static void debug(final String message) {
         debug(Level.INFO, message);
