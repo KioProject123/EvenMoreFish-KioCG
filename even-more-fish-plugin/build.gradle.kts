@@ -73,7 +73,7 @@ dependencies {
 }
 
 bukkit {
-    name = "EvenMoreFish"
+    name = "EvenMoreFish-KioCG"
     author = "Oheers"
     main = "com.oheers.fish.EvenMoreFish"
     version = project.version.toString()
@@ -100,6 +100,7 @@ bukkit {
         register("evenmorefish") {
             usage = "/<command> [name]"
             aliases = listOf("emf")
+            permission = "emf.command"
         }
     }
 }
