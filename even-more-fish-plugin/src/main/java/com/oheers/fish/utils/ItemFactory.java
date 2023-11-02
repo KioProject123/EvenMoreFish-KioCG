@@ -213,8 +213,6 @@ public class ItemFactory {
             return null;
         }
 
-        rawMaterial = true;
-
         try {
             return getItem(materialID);
         } catch (Exception e) {
