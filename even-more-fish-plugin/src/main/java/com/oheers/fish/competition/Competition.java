@@ -107,9 +107,7 @@ public class Competition {
         Bukkit.getServer().getPluginManager().callEvent(endEvent);
         for (Player player : Bukkit.getOnlinePlayers()) {
             new Message(ConfigMessage.COMPETITION_END).broadcast(player, true, true);
-            active = true; // KioCG
             sendPlayerLeaderboard(player);
-            active = false; // KioCG
         }
         active = false;
         handleRewards();
