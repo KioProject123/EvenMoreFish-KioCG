@@ -100,7 +100,6 @@ public class Competition {
     }
 
     public void end() {
-        active = false;
         // print leaderboard
         this.timingSystem.cancel();
         statusBar.hide();
@@ -112,6 +111,7 @@ public class Competition {
             sendPlayerLeaderboard(player);
             active = false; // KioCG
         }
+        active = false;
         handleRewards();
         if (originallyRandom) competitionType = CompetitionType.RANDOM;
         if (EvenMoreFish.mainConfig.databaseEnabled()) {
