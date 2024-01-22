@@ -16,6 +16,7 @@ import com.oheers.fish.exceptions.MaxBaitReachedException;
 import com.oheers.fish.exceptions.MaxBaitsReachedException;
 import com.oheers.fish.fishing.items.Fish;
 import com.oheers.fish.fishing.items.Rarity;
+import com.oheers.fish.permissions.UserPerms;
 import com.oheers.fish.requirements.Requirement;
 import com.oheers.fish.requirements.RequirementContext;
 import de.tr7zw.changeme.nbtapi.NBTItem;
@@ -30,7 +31,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -57,7 +57,7 @@ public class FishingProcessor implements Listener {
 
         if (EvenMoreFish.mainConfig.requireFishingPermission()) {
             //check if player have permssion to fish emf fishes
-            if (!EvenMoreFish.permission.has(event.getPlayer(), "emf.use_rod")) {
+            if (!EvenMoreFish.permission.has(event.getPlayer(), UserPerms.USE_ROD)) {
                 if (event.getState() == PlayerFishEvent.State.FISHING) {//send msg only when throw the lure
                     new Message(ConfigMessage.NO_PERMISSION_FISHING).broadcast(event.getPlayer(), true, false);
                 }
@@ -262,31 +262,26 @@ public class FishingProcessor implements Listener {
 
         if (EvenMoreFish.mainConfig.isDatabaseOnline()) {
             Fish finalFish = fish;
-            new BukkitRunnable() {
-                @Override
-                public void run() {
+            EvenMoreFish.getScheduler().runTaskAsynchronously(() -> {
+                // increases the fish fished count if the fish is already in the db
+                if (EvenMoreFish.databaseV3.hasFishData(finalFish)) {
+                    EvenMoreFish.databaseV3.incrementFish(finalFish);
 
-                   
-                        // increases the fish fished count if the fish is already in the db
-                        if (EvenMoreFish.databaseV3.hasFishData(finalFish)) {
-                            EvenMoreFish.databaseV3.incrementFish(finalFish);
+                    // sets the new leader in top fish, if the player has fished a record fish
+                    if (EvenMoreFish.databaseV3.getLargestFishSize(finalFish) < finalFish.getLength()) {
+                        EvenMoreFish.databaseV3.updateLargestFish(finalFish, player.getUniqueId());
+                    }
+                } else {
+                    EvenMoreFish.databaseV3.createFishData(finalFish, player.getUniqueId());
+                }
 
-                            // sets the new leader in top fish, if the player has fished a record fish
-                            if (EvenMoreFish.databaseV3.getLargestFishSize(finalFish) < finalFish.getLength()) {
-                                EvenMoreFish.databaseV3.updateLargestFish(finalFish, player.getUniqueId());
-                            }
-                        } else {
-                            EvenMoreFish.databaseV3.createFishData(finalFish, player.getUniqueId());
-                        }
+                EvenMoreFish.databaseV3.handleFishCatch(player.getUniqueId(), finalFish);
 
-                        EvenMoreFish.databaseV3.handleFishCatch(player.getUniqueId(), finalFish);
-                    
 //                    catch (SQLException exception) {
 //                        EvenMoreFish.logger.log(Level.SEVERE, "Failed SQL operations whilst writing fish catch data for " + player.getUniqueId() + ". Try restarting or contacting support.");
 //                        exception.printStackTrace();
 //                    }
-                }
-            }.runTaskAsynchronously(EvenMoreFish.getProvidingPlugin(EvenMoreFish.class));
+            });
         }
 
         return fish.give(-1);

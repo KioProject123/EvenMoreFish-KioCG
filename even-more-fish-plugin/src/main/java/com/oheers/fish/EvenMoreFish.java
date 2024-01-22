@@ -1,5 +1,7 @@
 package com.oheers.fish;
 
+import com.github.Anon8281.universalScheduler.UniversalScheduler;
+import com.github.Anon8281.universalScheduler.scheduling.schedulers.TaskScheduler;
 import com.oheers.fish.api.EMFAPI;
 import com.oheers.fish.baits.Bait;
 import com.oheers.fish.baits.BaitApplicationListener;
@@ -10,7 +12,10 @@ import com.oheers.fish.competition.JoinChecker;
 import com.oheers.fish.config.*;
 import com.oheers.fish.config.messages.Messages;
 import com.oheers.fish.database.*;
-import com.oheers.fish.events.*;
+import com.oheers.fish.events.AureliumSkillsFishingEvent;
+import com.oheers.fish.events.FishEatEvent;
+import com.oheers.fish.events.FishInteractEvent;
+import com.oheers.fish.events.McMMOTreasureEvent;
 import com.oheers.fish.exceptions.InvalidTableException;
 import com.oheers.fish.fishing.FishingProcessor;
 import com.oheers.fish.fishing.items.Fish;
@@ -39,7 +44,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.IOException;
@@ -100,6 +104,7 @@ public class EvenMoreFish extends JavaPlugin {
     public static DatabaseV3 databaseV3;
     public static HeadDatabaseAPI HDBapi;
     private static EvenMoreFish instance;
+    private static TaskScheduler scheduler;
     public static FillerStyle guiFillerStyle;
     private EMFAPI api;
 
@@ -109,6 +114,8 @@ public class EvenMoreFish extends JavaPlugin {
         return instance;
     }
 
+    public static TaskScheduler getScheduler() { return scheduler; }
+
 //    public AddonManager getAddonManager() {
 //        return addonManager;
 //    }
@@ -116,6 +123,7 @@ public class EvenMoreFish extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+        scheduler = UniversalScheduler.getScheduler(this);
         this.api = new EMFAPI();
 
 
@@ -186,7 +194,7 @@ public class EvenMoreFish extends JavaPlugin {
         competitionQueue.load();
 
         // async check for updates on the spigot page
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+        getScheduler().runTaskAsynchronously(() -> {
             // isUpdateAvailable = checkUpdate();
             try {
                 checkConfigVers();
@@ -213,20 +221,17 @@ public class EvenMoreFish extends JavaPlugin {
 
             databaseV3 = new DatabaseV3(this);
             //load user reports into cache
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    EvenMoreFish.databaseV3.createTables(false);
-                    for (Player player : getServer().getOnlinePlayers()) {
-                        UserReport playerReport = databaseV3.readUserReport(player.getUniqueId());
-                        if (playerReport == null) {
-                            EvenMoreFish.logger.warning("Could not read report for player (" + player.getUniqueId() + ")");
-                            continue;
-                        }
-                        DataManager.getInstance().putUserReportCache(player.getUniqueId(), playerReport);
+            getScheduler().runTaskAsynchronously(() -> {
+                EvenMoreFish.databaseV3.createTables(false);
+                for (Player player : getServer().getOnlinePlayers()) {
+                    UserReport playerReport = databaseV3.readUserReport(player.getUniqueId());
+                    if (playerReport == null) {
+                        EvenMoreFish.logger.warning("Could not read report for player (" + player.getUniqueId() + ")");
+                        continue;
                     }
+                    DataManager.getInstance().putUserReportCache(player.getUniqueId(), playerReport);
                 }
-            }.runTaskAsynchronously(this);
+            });
 
         }
 
@@ -381,15 +386,16 @@ public class EvenMoreFish extends JavaPlugin {
     }
 
     private void saveUserData() {
-        //really slow, we should execute this via a runnable.
-        if (!(mainConfig.isDatabaseOnline())) {
-            return;
-        }
+        getScheduler().runTask(() -> {
+            if (!(mainConfig.isDatabaseOnline())) {
+                return;
+            }
 
-        saveFishReports();
-        saveUserReports();
+            saveFishReports();
+            saveUserReports();
 
-        DataManager.getInstance().uncacheAll();
+            DataManager.getInstance().uncacheAll();
+        });
     }
 
     private void saveFishReports() {

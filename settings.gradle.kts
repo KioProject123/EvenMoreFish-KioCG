@@ -30,8 +30,8 @@ dependencyResolutionManagement {
             library("caffeine", "com.github.ben-manes.caffeine:caffeine:2.9.3")//We must use 2.9.3 until we upgrade to java 17
 
             library("itemsadder-api", "com.github.LoneDev6:API-ItemsAdder:3.5.0b")
-            library("nbt-api", "de.tr7zw:item-nbt-api:2.12.1")
-            library("denizens-api", "com.denizenscript:denizen:1.2.5-SNAPSHOT") // We must use 1.2.6 until we upgrade to java 17
+            library("nbt-api", "de.tr7zw:item-nbt-api:2.12.2")
+            library("denizen-api", "com.denizenscript:denizen:1.2.5-SNAPSHOT") // We must use 1.2.6 until we upgrade to java 17
             library("oraxen", "com.github.oraxen:oraxen:1.159.0")
 
             library("ecoitems-api", "com.willfp:EcoItems:5.6.1")
@@ -49,6 +49,8 @@ dependencyResolutionManagement {
             library("friendlyid", "com.devskiller.friendly-id:friendly-id:1.1.0")
             library("hikaricp", "com.zaxxer:HikariCP:4.0.3") //We must use 4.0.3 until we upgrade to java 17
             library("json-simple", "com.googlecode.json-simple:json-simple:1.1.1")
+
+            library("universalscheduler", "com.github.Anon8281:UniversalScheduler:0.1.6")
         }
     }
 }

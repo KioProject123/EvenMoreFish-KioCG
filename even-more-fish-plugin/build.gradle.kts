@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.oheers.evenmorefish"
-version = "1.6.11.16"
+version = "1.6.11.17"
 
 description = "A fishing extension bringing an exciting new experience to fishing."
 
@@ -60,6 +60,7 @@ dependencies {
 
     implementation(libs.nbt.api)
     implementation(libs.bstats)
+    implementation(libs.universalscheduler)
 
     library(libs.friendlyid)
     library(libs.flyway.core)
@@ -79,6 +80,7 @@ bukkit {
     version = project.version.toString()
     description = project.description.toString()
     website = "https://github.com/Oheers/EvenMoreFish"
+    foliaSupported = true
 
     depend = listOf("Vault")
     softDepend = listOf(
@@ -88,7 +90,7 @@ bukkit {
         "mcMMO",
         "AureliumSkills",
         "ItemsAdder",
-        "Denizens",
+        "Denizen",
         "EcoItems",
         "Oraxen",
         "HeadDatabase"
@@ -101,6 +103,59 @@ bukkit {
             usage = "/<command> [name]"
             aliases = listOf("emf")
             permission = "emf.command"
+        }
+    }
+
+    permissions {
+        register("emf.*") {
+            children = listOf(
+                "emf.admin",
+                "emf.user"
+            )
+        }
+
+        register("emf.admin") {
+            children = listOf(
+                "emf.admin.update.notify",
+                "emf.admin.migrate"
+            )
+        }
+
+        register("emf.admin.update.notify") {
+            description = "Allows users to be notified about updates."
+        }
+
+        register("emf.admin.migrate") {
+            description = "Allows users to use the migrate command."
+        }
+
+        register("emf.user") {
+            children = listOf(
+                "emf.toggle",
+                "emf.top",
+                "emf.shop",
+                "emf.use_rod",
+                "emf.sellall"
+            )
+        }
+
+        register("emf.sellall") {
+            description = "Allows users to use sellall."
+        }
+        register("emf.toggle") {
+            description = "Allows users to toggle emf."
+        }
+
+        register("emf.top") {
+            description = "Allows users to use /emf top."
+        }
+
+        register("emf.shop") {
+            description = "Allows users to use /emf shop."
+        }
+
+        register("emf.use_rod") {
+            description = "Allows users to use emf rods."
         }
     }
 }
